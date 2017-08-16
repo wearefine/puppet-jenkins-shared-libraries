@@ -126,10 +126,8 @@ def call(body) {
       try {
         stage('Acceptance Test'){
           milestone label: 'Acceptance Test'
-          rspecConfigs {
-            if(config.RUN_ACCEPTANCE) {
-              parallel config.ACCEPTANCE_TESTS
-            }
+          if(config.RUN_ACCEPTANCE) {
+            parallel config.ACCEPTANCE_TESTS
           }
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'SUCCESS'
