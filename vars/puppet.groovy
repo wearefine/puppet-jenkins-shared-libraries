@@ -41,7 +41,7 @@ def call(body) {
       error 'R10K_DEPLOY_URL is required when DEPLOY_WITH_R10K is set to true'
     }
     if (config.R10K_DEPLOY_BASIC_AUTH_CRED_ID) {
-      withCredentials([string(credentialsId: config.R10K_DEPLOY_BASIC_AUTH_CRED_ID, variable: 'baisc-auth')]) {
+      withCredentials([string(credentialsId: config.R10K_DEPLOY_BASIC_AUTH_CRED_ID, variable: 'basic-auth')]) {
         config.BASIC_AUTH_HEADER = "--header \'authorization: ${basic-auth}\'"
       }
     } else {
