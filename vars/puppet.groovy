@@ -7,10 +7,10 @@ def call(body) {
   body()
 
   if (!config.DEBUG) {
-    env.DEBUG = 'false'
+    config.DEBUG = 'false'
   }
   if (!config.SLACK_CHANNEL) {
-    env.SLACK_CHANNEL = '#puppet'
+    config.SLACK_CHANNEL = '#puppet'
   }
   if (!config.RUBY_VERSION){
     error 'RUBY_VERSION is required'
@@ -51,7 +51,7 @@ def call(body) {
     }
   }
 
-  if (env.DEBUG == 'false') {
+  if (config.DEBUG == 'true') {
     echo "RUBY_VERSION: ${config.RUBY_VERSION}"
     echo "RUBY_GEMSET: ${config.RUBY_GEMSET}"
     echo "TEST_RESULTS_DIR: ${config.TEST_RESULTS_DIR}"
@@ -62,13 +62,13 @@ def call(body) {
     echo "R10K_DEPLOY_BASIC_AUTH_CRED_ID: ${config.R10K_DEPLOY_BASIC_AUTH_CRED_ID}"
     echo "R10K_DEPLOY_BRANCH: ${config.R10K_DEPLOY_BRANCH}"
     echo "SLACK_CHANNEL: ${config.SLACK_CHANNEL}"
-    echo "DEBUG: ${env.DEBUG}"
+    echo "DEBUG: ${config.DEBUG}"
   }
 
   node {
     timestamps {
-      if (env.DEBUG == 'false') {
-        notifySlack(env.SLACK_CHANNEL)
+      if (config.DEBUG == 'false') {
+        notifySlack(config.SLACK_CHANNEL)
       }
 
       try {
@@ -78,12 +78,12 @@ def call(body) {
         }
       } catch(Exception e) {
         currentBuild.result = 'FAILURE'
-        if (env.DEBUG == 'false') {
-          notifySlack(env.SLACK_CHANNEL)
+        if (config.DEBUG == 'false') {
+          notifySlack(config.SLACK_CHANNEL)
         }
         throw e
       }
-      if (env.DEBUG == 'true') {
+      if (config.DEBUG == 'true') {
         echo "BRANCH_NAME: ${env.BRANCH_NAME}"
       }
 
@@ -97,8 +97,8 @@ def call(body) {
         }
       } catch(Exception e) {
         currentBuild.result = 'FAILURE'
-        if (env.DEBUG == 'false') {
-          notifySlack(env.SLACK_CHANNEL)
+        if (config.DEBUG == 'false') {
+          notifySlack(config.SLACK_CHANNEL)
         }
         throw e
       }
@@ -116,8 +116,8 @@ def call(body) {
       } catch(Exception e) {
         junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
         currentBuild.result = 'FAILURE'
-        if (env.DEBUG == 'false') {
-          notifySlack(env.SLACK_CHANNEL)
+        if (config.DEBUG == 'false') {
+          notifySlack(config.SLACK_CHANNEL)
         }
         throw e
       }
@@ -133,8 +133,8 @@ def call(body) {
         } catch(Exception e) {
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'FAILURE'
-          if (env.DEBUG == 'false') {
-            notifySlack(env.SLACK_CHANNEL)
+          if (config.DEBUG == 'false') {
+            notifySlack(config.SLACK_CHANNEL)
           }
           throw e
         }
@@ -144,24 +144,24 @@ def call(body) {
         try {
           stage('Deploy'){
             milestone label: 'Deploy'
-            def deploy_branch = R10K_DEPLOY_BRANCH.any {it == env.BRANCH_NAME}
+            def deploy_branch = config.R10K_DEPLOY_BRANCH.any {it == env.BRANCH_NAME}
               if (deploy_branch) {
-                sh returnStdout: true, script: "curl --request POST -k --url ${env.R10K_DEPLOY_URL}/payload  --header \'content-type: application/json\' ${config.BASIC_AUTH_HEADER} --data \'{\"push\":{\"changes\":[{\"new\":{\"name\":\"${env.BRANCH_NAME}\"}}]}}\'"
+                sh returnStdout: true, script: "curl --request POST -k --url ${config.R10K_DEPLOY_URL}/payload  --header \'content-type: application/json\' ${config.BASIC_AUTH_HEADER} --data \'{\"push\":{\"changes\":[{\"new\":{\"name\":\"${env.BRANCH_NAME}\"}}]}}\'"
                 currentBuild.result = 'SUCCESS'
               }
           }
         } catch(Exception e) {
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'FAILURE'
-          if (env.DEBUG == 'false') {
-            notifySlack(env.SLACK_CHANNEL)
+          if (config.DEBUG == 'false') {
+            notifySlack(config.SLACK_CHANNEL)
           }
           throw e
         }
       }
     } // timestamps
-    if (env.DEBUG == 'false') {
-      notifySlack(env.SLACK_CHANNEL)
+    if (config.DEBUG == 'false') {
+      notifySlack(config.SLACK_CHANNEL)
     }
   } //node
 }

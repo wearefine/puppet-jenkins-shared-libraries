@@ -7,7 +7,7 @@ def call(String commands) {
   else {
     ruby_string = "${env.RUBY_VERSION}@${env.RUBY_GEMSET}"
   }
-  if (env.DEBUG == 'true') {
+  if (config.DEBUG == 'true') {
     echo "*************************"
     echo "RVM Commands: ${commands}"
     echo "*************************"
