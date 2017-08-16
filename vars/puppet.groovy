@@ -28,15 +28,15 @@ def call(body) {
     config.TEST_RESULTS_DIR = 'testresults'
   }
   if (!config.RUN_ACCEPTANCE) {
-    config.RUN_ACCEPTANCE = false
-  } else {
+    config.RUN_ACCEPTANCE = 'false'
+  } else if (config.RUN_ACCEPTANCE == 'true') {
     if (!config.ACCEPTANCE_TESTS) {
       error 'ACCEPTANCE_TESTS is required when RUN_ACCEPTANCE is set to true'
     }
   }
   if (!config.DEPLOY_WITH_R10K) {
-    config.DEPLOY_WITH_R10K = false
-  } else {
+    config.DEPLOY_WITH_R10K = 'false'
+  } else if (config.DEPLOY_WITH_R10K == 'true') {
     if (!config.R10K_DEPLOY_URL) {
       error 'R10K_DEPLOY_URL is required when DEPLOY_WITH_R10K is set to true'
     }
@@ -50,6 +50,20 @@ def call(body) {
     if (!config.R10K_DEPLOY_BRANCH) {
       error 'R10K_DEPLOY_BRANCH is required when DEPLOY_WITH_R10K is set to true'
     }
+  }
+
+  if (env.DEBUG == 'false') {
+    println RUBY_VERSION
+    println RUBY_GEMSET
+    println TEST_RESULTS_DIR
+    println RUN_ACCEPTANCE
+    println ACCEPTANCE_TESTS
+    println DEPLOY_WITH_R10K
+    println R10K_DEPLOY_URL
+    println R10K_DEPLOY_BASIC_AUTH_CRED_ID
+    println R10K_DEPLOY_BRANCH
+    println SLACK_CHANNEL
+    println DEBUG
   }
 
   node {
@@ -72,20 +86,6 @@ def call(body) {
       }
       if (env.DEBUG == 'true') {
         echo "BRANCH_NAME: ${env.BRANCH_NAME}"
-      }
-      try {
-        stage('Setup Environment'){
-          milestone label: 'Setup Environment'
-          env.RUBY_VERSION = config.RUBY_VERSION
-          env.RUBY_GEMSET = config.RUBY_GEMSET
-          currentBuild.result = 'SUCCESS'
-        }
-      } catch(Exception e) {
-        currentBuild.result = 'FAILURE'
-        if (env.DEBUG == 'false') {
-          notifySlack(env.SLACK_CHANNEL)
-        }
-        throw e
       }
 
       try {
@@ -126,7 +126,7 @@ def call(body) {
       try {
         stage('Acceptance Test'){
           milestone label: 'Acceptance Test'
-          if(config.RUN_ACCEPTANCE) {
+          if(config.RUN_ACCEPTANCE == 'true') {
             parallel config.ACCEPTANCE_TESTS
           }
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
@@ -140,7 +140,7 @@ def call(body) {
         }
         throw e
       }
-      if (env.DEPLOY_WITH_R10K) {
+      if (config.DEPLOY_WITH_R10K == 'true') {
         try {
           stage('Deploy'){
             milestone label: 'Deploy'

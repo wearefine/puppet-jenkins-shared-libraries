@@ -2,7 +2,7 @@ puppet {
   RUBY_VERSION = 'ruby-2.2.3'
   RUBY_GEMSET = 'puppet'
   TEST_RESULTS_DIR = 'testresults'
-  RUN_ACCEPTANCE = true
+  RUN_ACCEPTANCE = 'true'
   ACCEPTANCE_TESTS = [
     'Ubuntu-1404 Puppet-1.6.2': {
       rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1404-docker rake acceptance')
@@ -12,7 +12,7 @@ puppet {
     },
     failFast: false
   ]
-  DEPLOY_WITH_R10K = true
+  DEPLOY_WITH_R10K = 'true'
   R10K_DEPLOY_URL = 'https://puppet.my-company.com:8088'
   R10K_DEPLOY_BASIC_AUTH_CRED_ID = 'puppet-basic-auth'
   R10K_DEPLOY_BRANCH = ['production', 'support']

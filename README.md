@@ -41,7 +41,7 @@ puppet {
   RUBY_VERSION = 'ruby-2.2.3'
   RUBY_GEMSET = 'puppet'
   TEST_RESULTS_DIR = 'testresults'
-  RUN_ACCEPTANCE = true
+  RUN_ACCEPTANCE = 'true'
   ACCEPTANCE_TESTS = [
     'Ubuntu-1404 Puppet-1.6.2': {
       rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1404-docker rake acceptance')
@@ -51,7 +51,7 @@ puppet {
     },
     failFast: false
   ]
-  DEPLOY_WITH_R10K = true
+  DEPLOY_WITH_R10K = 'true'
   R10K_DEPLOY_URL = 'https://puppet.my-company.com:8088'
   R10K_DEPLOY_BASIC_AUTH_CRED_ID = 'puppet-basic-auth'
   R10K_DEPLOY_BRANCH = ['production', 'support']
@@ -67,8 +67,8 @@ puppet {
 
 ### Optional Parameters
 
-- RUN_ACCEPTANCE: Run acceptance tests? [Boolean] Default: false
-- DEPLOY_WITH_R10K: Deploy branch with r10k. [Boolean] Default: false **NOTE:** This requires r10k to be configured web hook support. (https://forge.puppet.com/puppet/r10k#webhook-support)
+- RUN_ACCEPTANCE: Run acceptance tests? [String] true|false Default: false
+- DEPLOY_WITH_R10K: Deploy branch with r10k. [String] true|false Default: false **NOTE:** This requires r10k to be configured web hook support. (https://forge.puppet.com/puppet/r10k#webhook-support)
 - TEST_RESULTS_DIR: Directory to look for junit output of test results. [String] Default: testresults
 - ACCEPTANCE_TESTS: Required if RUN_ACCEPTANCE is true. Map of values to use for running in the parallel step. [Map] See [below](#Acceptance Test Configuration) for more details
 - R10K_DEPLOY_URL: Required if DEPLOY_WITH_R10K is true. The URL of the Puppet server. [String]
