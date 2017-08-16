@@ -1,7 +1,6 @@
 #!/usr/bin/env groovy
 
 def call(body) {
-  // evaluate the body block, and collect configuration into the object
   def config = [:]
   body.resolveStrategy = Closure.DELEGATE_FIRST
   body.delegate = config
@@ -52,19 +51,19 @@ def call(body) {
     }
   }
 
-  // if (env.DEBUG == 'false') {
-    println config.RUBY_VERSION
-    println config.RUBY_GEMSET
-    println config.TEST_RESULTS_DIR
-    println config.RUN_ACCEPTANCE
-    println config.ACCEPTANCE_TESTS
-    println config.DEPLOY_WITH_R10K
-    println config.R10K_DEPLOY_URL
-    println config.R10K_DEPLOY_BASIC_AUTH_CRED_ID
-    println config.R10K_DEPLOY_BRANCH
-    println config.SLACK_CHANNEL
-    println config.DEBUG
-  // }
+  if (env.DEBUG == 'false') {
+    echo "RUBY_VERSION: ${config.RUBY_VERSION}"
+    echo "RUBY_GEMSET: ${config.RUBY_GEMSET}"
+    echo "TEST_RESULTS_DIR: ${config.TEST_RESULTS_DIR}"
+    echo "RUN_ACCEPTANCE: ${config.RUN_ACCEPTANCE}"
+    echo "ACCEPTANCE_TESTS: ${config.ACCEPTANCE_TESTS}"
+    echo "DEPLOY_WITH_R10K: ${config.DEPLOY_WITH_R10K}"
+    echo "R10K_DEPLOY_URL: ${config.R10K_DEPLOY_URL}"
+    echo "R10K_DEPLOY_BASIC_AUTH_CRED_ID: ${config.R10K_DEPLOY_BASIC_AUTH_CRED_ID}"
+    echo "R10K_DEPLOY_BRANCH: ${config.R10K_DEPLOY_BRANCH}"
+    echo "SLACK_CHANNEL: ${config.SLACK_CHANNEL}"
+    echo "DEBUG: ${env.DEBUG}"
+  }
 
   node {
     timestamps {
@@ -123,23 +122,24 @@ def call(body) {
         throw e
       }
 
-      try {
-        stage('Acceptance Test'){
-          milestone label: 'Acceptance Test'
-          if(config.RUN_ACCEPTANCE == 'true') {
+      if(config.RUN_ACCEPTANCE == 'true') {
+        try {
+          stage('Acceptance Test'){
+            milestone label: 'Acceptance Test'
             parallel config.ACCEPTANCE_TESTS
+            junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+            currentBuild.result = 'SUCCESS'
           }
+        } catch(Exception e) {
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
-          currentBuild.result = 'SUCCESS'
+          currentBuild.result = 'FAILURE'
+          if (env.DEBUG == 'false') {
+            notifySlack(env.SLACK_CHANNEL)
+          }
+          throw e
         }
-      } catch(Exception e) {
-        junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
-        currentBuild.result = 'FAILURE'
-        if (env.DEBUG == 'false') {
-          notifySlack(env.SLACK_CHANNEL)
-        }
-        throw e
       }
+
       if (config.DEPLOY_WITH_R10K == 'true') {
         try {
           stage('Deploy'){
