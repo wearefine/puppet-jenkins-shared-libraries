@@ -53,17 +53,17 @@ def call(body) {
   }
 
   // if (env.DEBUG == 'false') {
-    println RUBY_VERSION
-    println RUBY_GEMSET
-    println TEST_RESULTS_DIR
-    println RUN_ACCEPTANCE
-    println ACCEPTANCE_TESTS
-    println DEPLOY_WITH_R10K
-    println R10K_DEPLOY_URL
-    println R10K_DEPLOY_BASIC_AUTH_CRED_ID
-    println R10K_DEPLOY_BRANCH
-    println SLACK_CHANNEL
-    println DEBUG
+    println config.RUBY_VERSION
+    println config.RUBY_GEMSET
+    println config.TEST_RESULTS_DIR
+    println config.RUN_ACCEPTANCE
+    println config.ACCEPTANCE_TESTS
+    println config.DEPLOY_WITH_R10K
+    println config.R10K_DEPLOY_URL
+    println config.R10K_DEPLOY_BASIC_AUTH_CRED_ID
+    println config.R10K_DEPLOY_BRANCH
+    println config.SLACK_CHANNEL
+    println config.DEBUG
   // }
 
   node {
