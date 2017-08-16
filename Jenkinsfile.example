@@ -9,7 +9,8 @@ puppet {
     },
     'Ubuntu-1604 Puppet-1.6.2': {
       rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1604-docker rake acceptance')
-    }
+    },
+    failFast: false
   ]
   DEPLOY_WITH_R10K = true
   R10K_DEPLOY_URL = 'https://puppet.my-company.com:8088'

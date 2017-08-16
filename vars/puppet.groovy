@@ -129,8 +129,6 @@ def call(body) {
           rspecConfigs {
             if(config.RUN_ACCEPTANCE) {
               parallel config.ACCEPTANCE_TESTS
-              },
-              failFast: false
             }
           }
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"

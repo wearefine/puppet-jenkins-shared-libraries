@@ -48,7 +48,8 @@ puppet {
     },
     'Ubuntu-1604 Puppet-1.6.2': {
       rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1604-docker rake acceptance')
-    }
+    },
+    failFast: false
   ]
   DEPLOY_WITH_R10K = true
   R10K_DEPLOY_URL = 'https://puppet.my-company.com:8088'
@@ -87,7 +88,8 @@ ACCEPTANCE_TESTS = [
   },
   '<job-name>': {
     rvm('<command to run within the context of the rvm ruby gemset>')
-  }
+  },
+  failFast: false
 ]
 ```
 I went ahead and left the first item in the map the same as above but changed the second to include explanations of the values. The main part to point out here is the `rvm(...)` wrapper function. This function is used in the shared library to run all the commands within the scope of the specified ruby version and gemset name as specified by the `RUBY_VERSION` and `RUBY_GEMSET` parameters. The wrapper function is also safe to use for anything not needing ruby as well. It is however highly advised you use the rvm wrapper function to run the actual acceptance tests since that does require the ruby version and gemset that was installed earlier in the build process.
