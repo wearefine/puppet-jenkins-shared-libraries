@@ -1,8 +1,8 @@
 puppet {
-  RUBY_VERSION = "ruby-2.2.3" // Ruby version to use
-  RUBY_GEMSET = "puppet" // Name of the gemset to create
-  TEST_RESULTS_DIR = 'testresults' // directory to look for junit output of test results. Default: testresults
-  RUN_ACCEPTANCE = false // Run acceptance tests? Default: false
+  RUBY_VERSION = 'ruby-2.2.3'
+  RUBY_GEMSET = 'puppet'
+  TEST_RESULTS_DIR = 'testresults'
+  RUN_ACCEPTANCE = true
   ACCEPTANCE_TESTS = [
     'Ubuntu-1404 Puppet-1.6.2': {
       rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1404-docker rake acceptance')
@@ -10,11 +10,11 @@ puppet {
     'Ubuntu-1604 Puppet-1.6.2': {
       rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1604-docker rake acceptance')
     }
-  ] // Map of values to use for running in the parallel step. 
-  DEPLOY_WITH_R10K = true // Deploy branch with r10k. Default: false NOTE: This requires r10k to be configred webhook support. (https://forge.puppet.com/puppet/r10k#webhook-support)
-  R10K_DEPLOY_URL = 'https://puppet.afinedevelopment.com:8088'
-  R10K_DEPLOY_BASIC_AUTH_CRED_ID = '' // Optional param that is only needed if your puppet server URL is behind basic auth. This is the credentialsId set in the credentials plugin in Jenkins
-  R10K_DEPLOY_BRANCH = ['production', 'devstage', 'support'] // Env branch(s) to deploy with r10k 
-  // SLACK_CHANNEL = '#channel' // Optional param to specify the Slack channel to use for notifications. Default: #puppet
-  // DEBUG = 'true' // Optional param to turn off Slack notifications and turn on more console output. Default: false
+  ]
+  DEPLOY_WITH_R10K = true
+  R10K_DEPLOY_URL = 'https://puppet.my-company.com:8088'
+  R10K_DEPLOY_BASIC_AUTH_CRED_ID = 'puppet-basic-auth'
+  R10K_DEPLOY_BRANCH = ['production', 'support']
+  SLACK_CHANNEL = '#puppet'
+  DEBUG = 'false'
 }

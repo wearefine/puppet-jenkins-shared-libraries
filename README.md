@@ -90,7 +90,7 @@ ACCEPTANCE_TESTS = [
   }
 ]
 ```
-I went ahead and left the first item in the map the same as above but changed the second to include explanations of the values. The main part to point out here is the `rvm(...)` wrapper function. This function is used in the shared library to run all the commands within the scope of the specified ruby version and gemset name as specified by the `RUBY_VERSION` and `RUBY_GEMSET` parameters. The wrapper function is also safe to use for anything not needing ruby as well. It is however highly advised you use the rvm wrapper runction to run the actual acceptance tests since that does require the ruby version and gemset that was installed earlier in the build process.
+I went ahead and left the first item in the map the same as above but changed the second to include explanations of the values. The main part to point out here is the `rvm(...)` wrapper function. This function is used in the shared library to run all the commands within the scope of the specified ruby version and gemset name as specified by the `RUBY_VERSION` and `RUBY_GEMSET` parameters. The wrapper function is also safe to use for anything not needing ruby as well. It is however highly advised you use the rvm wrapper function to run the actual acceptance tests since that does require the ruby version and gemset that was installed earlier in the build process.
 
 ## Test Results
 All test results are assumed to be in JUnit format and placed in a single directory.
