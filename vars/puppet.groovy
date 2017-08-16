@@ -8,6 +8,7 @@ def call(body) {
 
   if (!config.DEBUG) {
     config.DEBUG = 'false'
+    env.DEBUG = 'false'
   }
   if (!config.SLACK_CHANNEL) {
     config.SLACK_CHANNEL = '#puppet'
