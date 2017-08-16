@@ -52,7 +52,7 @@ def call(body) {
     }
   }
 
-  if (env.DEBUG == 'false') {
+  // if (env.DEBUG == 'false') {
     println RUBY_VERSION
     println RUBY_GEMSET
     println TEST_RESULTS_DIR
@@ -64,7 +64,7 @@ def call(body) {
     println R10K_DEPLOY_BRANCH
     println SLACK_CHANNEL
     println DEBUG
-  }
+  // }
 
   node {
     timestamps {
