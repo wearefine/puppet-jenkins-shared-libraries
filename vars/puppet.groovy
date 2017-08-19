@@ -69,7 +69,7 @@ def call(body) {
   node {
     timestamps {
       if (config.DEBUG == 'false') {
-        notifySlack(config.SLACK_CHANNEL)
+        puppetSlack(config.SLACK_CHANNEL)
       }
 
       try {
@@ -80,7 +80,7 @@ def call(body) {
       } catch(Exception e) {
         currentBuild.result = 'FAILURE'
         if (config.DEBUG == 'false') {
-          notifySlack(config.SLACK_CHANNEL)
+          puppetSlack(config.SLACK_CHANNEL)
         }
         throw e
       }
@@ -92,14 +92,14 @@ def call(body) {
         stage('Install Dependancies'){
           milestone label: 'Install Dependancies'
           retry(2) {
-            rvm('bundle install')
+            puppetRvm('bundle install')
           }
           currentBuild.result = 'SUCCESS'
         }
       } catch(Exception e) {
         currentBuild.result = 'FAILURE'
         if (config.DEBUG == 'false') {
-          notifySlack(config.SLACK_CHANNEL)
+          puppetSlack(config.SLACK_CHANNEL)
         }
         throw e
       }
@@ -110,7 +110,7 @@ def call(body) {
           dir(config.TEST_RESULTS_DIR) {
             deleteDir()
           }
-          rvm("rake test")
+          puppetRvm("rake test")
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'SUCCESS'
         }
@@ -118,7 +118,7 @@ def call(body) {
         junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
         currentBuild.result = 'FAILURE'
         if (config.DEBUG == 'false') {
-          notifySlack(config.SLACK_CHANNEL)
+          puppetSlack(config.SLACK_CHANNEL)
         }
         throw e
       }
@@ -135,7 +135,7 @@ def call(body) {
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'FAILURE'
           if (config.DEBUG == 'false') {
-            notifySlack(config.SLACK_CHANNEL)
+            puppetSlack(config.SLACK_CHANNEL)
           }
           throw e
         }
@@ -155,14 +155,14 @@ def call(body) {
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'FAILURE'
           if (config.DEBUG == 'false') {
-            notifySlack(config.SLACK_CHANNEL)
+            puppetSlack(config.SLACK_CHANNEL)
           }
           throw e
         }
       }
     } // timestamps
     if (config.DEBUG == 'false') {
-      notifySlack(config.SLACK_CHANNEL)
+      puppetSlack(config.SLACK_CHANNEL)
     }
   } //node
 }

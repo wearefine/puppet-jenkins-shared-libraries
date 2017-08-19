@@ -5,10 +5,10 @@ puppet {
   RUN_ACCEPTANCE = 'true'
   ACCEPTANCE_TESTS = [
     'Ubuntu-1404 Puppet-1.6.2': {
-      rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1404-docker rake acceptance')
+      puppetRvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1404-docker rake acceptance')
     },
     'Ubuntu-1604 Puppet-1.6.2': {
-      rvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1604-docker rake acceptance')
+      puppetRvm('PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.6.2 BEAKER_set=ubuntu-1604-docker rake acceptance')
     },
     failFast: false
   ]
