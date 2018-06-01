@@ -1,0 +1,13 @@
+node {
+  try {
+    stage('Volume Clean') {
+      sh 'docker volume prune -f'
+    }
+    currentBuild.result = 'SUCCESS'
+  } catch(Exception e) {
+    currentBuild.result = 'FAILURE'
+    slackSend channel: '#devops', failOnError: true, color: 'danger', message: 'Jenkins Docker cleanup run *FAILED*!'
+    throw e
+  }
+  slackSend channel: '#devops', failOnError: true, color: 'good', message: 'Jenkins Docker cleanup run *SUCCESSFUL*!'
+}

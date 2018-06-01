@@ -88,46 +88,37 @@ def call(body) {
         echo "BRANCH_NAME: ${env.BRANCH_NAME}"
       }
 
-      try {
-        stage('Install Dependancies'){
-          milestone label: 'Install Dependancies'
-          retry(2) {
-            puppetRvm('bundle install')
-          }
-          currentBuild.result = 'SUCCESS'
-        }
-      } catch(Exception e) {
-        currentBuild.result = 'FAILURE'
+      def dockerBuild = fileExists 'docker-compose.yml'
+      if (dockerBuild) {
+        puppetDocker(config)
         if (config.DEBUG == 'false') {
           puppetSlack(config.SLACK_CHANNEL)
         }
-        throw e
-      }
+      } else {
 
-      try {
-        stage('Unit Test'){
-          milestone label: 'Unit Test'
-          dir(config.TEST_RESULTS_DIR) {
-            deleteDir()
-          }
-          puppetRvm("rake test")
-          junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
-          currentBuild.result = 'SUCCESS'
-        }
-      } catch(Exception e) {
-        junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
-        currentBuild.result = 'FAILURE'
-        if (config.DEBUG == 'false') {
-          puppetSlack(config.SLACK_CHANNEL)
-        }
-        throw e
-      }
-
-      if(config.RUN_ACCEPTANCE == 'true') {
         try {
-          stage('Acceptance Test'){
-            milestone label: 'Acceptance Test'
-            parallel config.ACCEPTANCE_TESTS
+          stage('Install Dependancies'){
+            milestone label: 'Install Dependancies'
+            retry(2) {
+              puppetRvm('bundle install')
+            }
+            currentBuild.result = 'SUCCESS'
+          }
+        } catch(Exception e) {
+          currentBuild.result = 'FAILURE'
+          if (config.DEBUG == 'false') {
+            puppetSlack(config.SLACK_CHANNEL)
+          }
+          throw e
+        }
+
+        try {
+          stage('Unit Test'){
+            milestone label: 'Unit Test'
+            dir(config.TEST_RESULTS_DIR) {
+              deleteDir()
+            }
+            puppetRvm("rake test")
             junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
             currentBuild.result = 'SUCCESS'
           }
@@ -139,30 +130,49 @@ def call(body) {
           }
           throw e
         }
-      }
 
-      if (config.DEPLOY_WITH_R10K == 'true') {
-        try {
-          stage('Deploy'){
-            milestone label: 'Deploy'
-            def deploy_branch = config.R10K_DEPLOY_BRANCH.any {it == env.BRANCH_NAME}
-              if (deploy_branch) {
-                sh returnStdout: true, script: "curl --request POST -k --url ${config.R10K_DEPLOY_URL}/payload  --header \'content-type: application/json\' ${config.BASIC_AUTH_HEADER} --data \'{\"push\":{\"changes\":[{\"new\":{\"name\":\"${env.BRANCH_NAME}\"}}]}}\'"
-                currentBuild.result = 'SUCCESS'
-              }
+        if(config.RUN_ACCEPTANCE == 'true') {
+          try {
+            stage('Acceptance Test'){
+              milestone label: 'Acceptance Test'
+              parallel config.ACCEPTANCE_TESTS
+              junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+              currentBuild.result = 'SUCCESS'
+            }
+          } catch(Exception e) {
+            junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+            currentBuild.result = 'FAILURE'
+            if (config.DEBUG == 'false') {
+              puppetSlack(config.SLACK_CHANNEL)
+            }
+            throw e
           }
-        } catch(Exception e) {
-          junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
-          currentBuild.result = 'FAILURE'
-          if (config.DEBUG == 'false') {
-            puppetSlack(config.SLACK_CHANNEL)
+        }
+
+        if (config.DEPLOY_WITH_R10K == 'true') {
+          try {
+            stage('Deploy'){
+              milestone label: 'Deploy'
+              def deploy_branch = config.R10K_DEPLOY_BRANCH.any {it == env.BRANCH_NAME}
+                if (deploy_branch) {
+                  sh returnStdout: true, script: "curl --request POST -k --url ${config.R10K_DEPLOY_URL}/payload  --header \'content-type: application/json\' ${config.BASIC_AUTH_HEADER} --data \'{\"push\":{\"changes\":[{\"new\":{\"name\":\"${env.BRANCH_NAME}\"}}]}}\'"
+                  currentBuild.result = 'SUCCESS'
+                }
+            }
+          } catch(Exception e) {
+            junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+            currentBuild.result = 'FAILURE'
+            if (config.DEBUG == 'false') {
+              puppetSlack(config.SLACK_CHANNEL)
+            }
+            throw e
           }
-          throw e
+        }
+        if (config.DEBUG == 'false') {
+          puppetSlack(config.SLACK_CHANNEL)
         }
       }
+      cleanWs notFailBuild: true
     } // timestamps
-    if (config.DEBUG == 'false') {
-      puppetSlack(config.SLACK_CHANNEL)
-    }
   } //node
 }
