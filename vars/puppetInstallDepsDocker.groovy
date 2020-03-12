@@ -5,7 +5,7 @@ def call(Map config) {
     stage('Install Dependancies') {
       milestone label: 'Install Dependancies'
       retry(2) {
-        sh "${config.container} bundle install --quiet --clean --jobs=4"
+        sh "${config.container} ./install_pdk.sh"
       }
       currentBuild.result = 'SUCCESS'
     }
