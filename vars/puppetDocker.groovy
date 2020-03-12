@@ -22,14 +22,97 @@ def call(Map config) {
   
   docker.withRegistry(config.DOCKER_REGISTRY_URL, "ecr:${env.AWS_DEFAULT_REGION}:${config.DOCKER_REGISTRY_CREDS_ID}") {
 
-    config.container = "docker run -t --rm --name ${env.BUILD_TAG} -w /app -v ${env.WORKSPACE}:/app -v ${env.GEM_VOLUME}:/gems -e PDK_FEATURE_FLAGS=controlrepo -e RAILS_ENV=${env.RAILS_ENV} ${config.DOCKER_REGISTRY}:${env.RUBY_VERSION}"
+    containerArgs = --name ${env.BUILD_TAG} -e PDK_FEATURE_FLAGS=controlrepo -e RAILS_ENV=${env.RAILS_ENV}
 
-    puppetInstallDepsDocker(config)
+    docker.image("${config.DOCKER_REGISTRY}:${env.RUBY_VERSION}").inside(containerArgs) {
 
-    puppetTestsDocker(config)
+      try {
+        stage('Install Dependancies') {
+          milestone label: 'Install Dependancies'
+          retry(2) {
+            sh './install_pdk.sh'
+          }
+          currentBuild.result = 'SUCCESS'
+        }
+      } catch(Exception e) {
+        currentBuild.result = 'FAILURE'
+        if (config.DEBUG == 'false') {
+          puppetSlack(config.SLACK_CHANNEL)
+        }
+        throw e
+      }
+    }
 
-    puppetDeployDocker(config)
+    try {
+      stage('Lint') {
+        milestone label: 'Test'
 
-    sh "${config.container} chown -R 1003:1004 /app"
+        sh '/usr/local/bin/pdk validate'
+      }
+    } catch(Exception e) {
+      junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+      
+      currentBuild.result = 'FAILURE'
+      if (config.DEBUG == 'false') {
+        puppetSlack(config.SLACK_CHANNEL)
+      }
+      throw e
+    }
+
+    try {
+      stage('Unit Test') {
+        milestone label: 'Test'
+
+        sh '/usr/local/bin/pdk test unit --clean-fixtures --format junit:results/report.xml'
+        
+        junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+        currentBuild.result = 'SUCCESS'
+      }
+    } catch(Exception e) {
+      junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+      
+      currentBuild.result = 'FAILURE'
+      if (config.DEBUG == 'false') {
+        puppetSlack(config.SLACK_CHANNEL)
+      }
+      throw e
+    }
+
+    try {
+      stage('Deploy') {
+        milestone label: 'Deploy'
+
+        if (config.DEPLOY_WITH_R10K == 'true') {
+          try {
+            stage('Deploy'){
+              milestone label: 'Deploy'
+              def deploy_branch = config.R10K_DEPLOY_BRANCH.any {it == env.BRANCH_NAME}
+                
+                if (deploy_branch) {
+                  sh returnStdout: true, script: "curl --request POST -k --url ${config.R10K_DEPLOY_URL}/payload  --header \'content-type: application/json\' ${config.BASIC_AUTH_HEADER} --data \'{\"push\":{\"changes\":[{\"new\":{\"name\":\"${env.BRANCH_NAME}\"}}]}}\'"
+
+                  currentBuild.result = 'SUCCESS'
+                }
+            }
+          } catch(Exception e) {
+            junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
+            currentBuild.result = 'FAILURE'
+            if (config.DEBUG == 'false') {
+              puppetSlack(config.SLACK_CHANNEL)
+            }
+            throw e
+          }
+        }
+
+        currentBuild.result = 'SUCCESS'
+      }
+    } catch(Exception e) {
+      currentBuild.result = 'FAILURE'
+      if (config.DEBUG == 'false') {
+        puppetSlack(config.SLACK_CHANNEL)
+      }
+      throw e
+    }
+
   } // withRegistry
 } // top level function
