@@ -22,7 +22,7 @@ def call(Map config) {
   
   docker.withRegistry(config.DOCKER_REGISTRY_URL, "ecr:${env.AWS_DEFAULT_REGION}:${config.DOCKER_REGISTRY_CREDS_ID}") {
 
-    config.container = "docker run -t --rm --name ${env.BUILD_TAG} -w /app -v ${env.WORKSPACE}:/app -v ${env.GEM_VOLUME}:/gems -e RAILS_ENV=${env.RAILS_ENV} ${config.DOCKER_REGISTRY}:${env.RUBY_VERSION}"
+    config.container = "docker run -t --rm --name ${env.BUILD_TAG} -w /app -v ${env.WORKSPACE}:/app -v ${env.GEM_VOLUME}:/gems -e PDK_FEATURE_FLAGS=controlrepo -e RAILS_ENV=${env.RAILS_ENV} ${config.DOCKER_REGISTRY}:${env.RUBY_VERSION}"
 
     puppetInstallDepsDocker(config)
 

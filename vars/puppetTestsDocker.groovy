@@ -5,7 +5,7 @@ def call(Map config) {
     stage('Lint') {
       milestone label: 'Test'
 
-      sh "${config.container} PDK_FEATURE_FLAGS=controlrepo /usr/local/bin/pdk validate"
+      sh "${config.container} /usr/local/bin/pdk validate"
     }
   } catch(Exception e) {
      junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
@@ -21,7 +21,7 @@ def call(Map config) {
     stage('Unit Test') {
       milestone label: 'Test'
 
-      sh "${config.container} /usr/local/bin/pdk PDK_FEATURE_FLAGS=controlrepo pdk test unit --clean-fixtures --format junit:results/report.xml"
+      sh "${config.container} /usr/local/bin/pdk test unit --clean-fixtures --format junit:results/report.xml"
       
        junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
       currentBuild.result = 'SUCCESS'
