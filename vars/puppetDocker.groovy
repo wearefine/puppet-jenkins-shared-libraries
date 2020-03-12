@@ -22,32 +22,15 @@ def call(Map config) {
   
   docker.withRegistry(config.DOCKER_REGISTRY_URL, "ecr:${env.AWS_DEFAULT_REGION}:${config.DOCKER_REGISTRY_CREDS_ID}") {
 
-    containerArgs = --name ${env.BUILD_TAG} -e PDK_FEATURE_FLAGS=controlrepo -e RAILS_ENV=${env.RAILS_ENV}
+    containerArgs = "--name ${env.BUILD_TAG} -e PDK_FEATURE_FLAGS=controlrepo"
 
     docker.image("${config.DOCKER_REGISTRY}:${env.RUBY_VERSION}").inside(containerArgs) {
-
-      try {
-        stage('Install Dependancies') {
-          milestone label: 'Install Dependancies'
-          retry(2) {
-            sh './install_pdk.sh'
-          }
-          currentBuild.result = 'SUCCESS'
-        }
-      } catch(Exception e) {
-        currentBuild.result = 'FAILURE'
-        if (config.DEBUG == 'false') {
-          puppetSlack(config.SLACK_CHANNEL)
-        }
-        throw e
-      }
-    }
 
     try {
       stage('Lint') {
         milestone label: 'Test'
 
-        sh '/usr/local/bin/pdk validate'
+        sh 'pdk validate'
       }
     } catch(Exception e) {
       junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
@@ -63,7 +46,7 @@ def call(Map config) {
       stage('Unit Test') {
         milestone label: 'Test'
 
-        sh '/usr/local/bin/pdk test unit --clean-fixtures --format junit:results/report.xml'
+        sh "pdk test unit --clean-fixtures --format junit:${config.TEST_RESULTS_DIR}/report.xml"
         
         junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
         currentBuild.result = 'SUCCESS'
