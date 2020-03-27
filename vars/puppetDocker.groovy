@@ -25,7 +25,7 @@ def call(Map config) {
 
     containerArgs = "--name ${env.BUILD_TAG} -v ${PDK_VOLUME}:/.pdk -v ${PUPPETLABS_VOLUME}:/.puppetlabs -e PDK_DISABLE_ANALYTICS=true -e PDK_FEATURE_FLAGS=controlrepo"
 
-    docker.image("${config.DOCKER_REGISTRY}:${env.RUBY_VERSION}").inside(containerArgs) {
+    docker.image("${config.DOCKER_REGISTRY}:${env.PUPPET_VERSION}").inside(containerArgs) {
 
       try {
         stage('Lint') {
