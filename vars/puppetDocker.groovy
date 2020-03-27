@@ -29,7 +29,7 @@ def call(Map config) {
 
       try {
         stage('Lint') {
-          milestone label: 'Test'
+          milestone label: 'Lint'
 
           sh "pdk validate --puppet-version ${config.PUPPET_VERSION}"
         }
@@ -45,7 +45,7 @@ def call(Map config) {
 
       try {
         stage('Unit Test') {
-          milestone label: 'Test'
+          milestone label: 'Unit Test'
 
           sh "pdk test unit --puppet-version ${config.PUPPET_VERSION} --clean-fixtures --format junit:${config.TEST_RESULTS_DIR}/report.xml"
           
