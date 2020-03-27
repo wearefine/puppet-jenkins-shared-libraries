@@ -18,11 +18,12 @@ def call(Map config) {
   
   config.DOCKER_REGISTRY = config.DOCKER_REGISTRY_URL.split('https://')[1]
   env.REPO_NAME = env.JOB_NAME.split('/')[0]
-  env.GEM_VOLUME = "${env.REPO_NAME}_${env.BRANCH_NAME}_gems"
+  env.PDK_VOLUME = "${env.REPO_NAME}_${env.BRANCH_NAME}_pdk_gems"
+  env.PUPPETLABS_VOLUME = "${env.REPO_NAME}_${env.BRANCH_NAME}_puppetlabs_cache"
   
   docker.withRegistry(config.DOCKER_REGISTRY_URL, "ecr:${env.AWS_DEFAULT_REGION}:${config.DOCKER_REGISTRY_CREDS_ID}") {
 
-    containerArgs = "--name ${env.BUILD_TAG} -e PDK_FEATURE_FLAGS=controlrepo"
+    containerArgs = "--name ${env.BUILD_TAG} -v ${PDK_VOLUME}:/.pdk -v ${PUPPETLABS_VOLUME}:/.puppetlabs -e PDK_DISABLE_ANALYTICS=true -e PDK_FEATURE_FLAGS=controlrepo"
 
     docker.image("${config.DOCKER_REGISTRY}:${env.RUBY_VERSION}").inside(containerArgs) {
 
@@ -30,7 +31,7 @@ def call(Map config) {
         stage('Lint') {
           milestone label: 'Test'
 
-          sh 'pdk validate'
+          sh "pdk validate --puppet-version ${config.PUPPET_VERSION}"
         }
       } catch(Exception e) {
         junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
@@ -46,7 +47,7 @@ def call(Map config) {
         stage('Unit Test') {
           milestone label: 'Test'
 
-          sh "pdk test unit --clean-fixtures --format junit:${config.TEST_RESULTS_DIR}/report.xml"
+          sh "pdk test unit --puppet-version ${config.PUPPET_VERSION} --clean-fixtures --format junit:${config.TEST_RESULTS_DIR}/report.xml"
           
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'SUCCESS'

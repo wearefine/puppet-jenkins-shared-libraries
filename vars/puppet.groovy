@@ -13,10 +13,10 @@ def call(body) {
   if (!config.SLACK_CHANNEL) {
     config.SLACK_CHANNEL = '#puppet'
   }
-  if (!config.RUBY_VERSION){
-    error 'RUBY_VERSION is required'
+  if (!config.PUPPET_VERSION){
+    error 'PUPPET_VERSION is required'
   } else {
-    env.RUBY_VERSION = config.RUBY_VERSION
+    env.PUPPET_VERSION = config.PUPPET_VERSION
   }
   if (!config.RUBY_GEMSET){
     error 'RUBY_GEMSET is required'
