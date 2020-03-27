@@ -47,8 +47,12 @@ def call(Map config) {
         stage('Unit Test') {
           milestone label: 'Unit Test'
 
-          sh "pdk test unit --puppet-version ${config.PUPPET_VERSION} --clean-fixtures --format junit:${config.TEST_RESULTS_DIR}/report.xml"
-          
+          sh 'mkdir -p testresults'
+
+          touch file: 'testresults/results.xml', timestamp: 0
+
+          sh "pdk test unit --puppet-version ${config.PUPPET_VERSION} --clean-fixtures --parallel --format junit:${config.TEST_RESULTS_DIR}/report.xml"
+
           junit allowEmptyResults: true, keepLongStdio: true, testResults: "${config.TEST_RESULTS_DIR}/*.xml"
           currentBuild.result = 'SUCCESS'
         }
