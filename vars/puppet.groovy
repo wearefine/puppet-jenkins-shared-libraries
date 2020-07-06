@@ -42,7 +42,7 @@ def call(body) {
     }
     if (config.R10K_DEPLOY_BASIC_AUTH_CRED_ID) {
       withCredentials([string(credentialsId: config.R10K_DEPLOY_BASIC_AUTH_CRED_ID, variable: 'basic_auth')]) {
-        config.BASIC_AUTH_HEADER = "--header \'authorization: ${basic_auth}\'"
+        config.BASIC_AUTH_HEADER = "--header \"Authorization: Basic ${basic_auth}\""
       }
     } else {
       config.BASIC_AUTH_HEADER = ''
@@ -155,7 +155,7 @@ def call(body) {
               milestone label: 'Deploy'
               def deploy_branch = config.R10K_DEPLOY_BRANCH.any {it == env.BRANCH_NAME}
                 if (deploy_branch) {
-                  sh returnStdout: true, script: "curl --request POST -k --url ${config.R10K_DEPLOY_URL}/payload  --header \'content-type: application/json\' ${config.BASIC_AUTH_HEADER} --data \'{\"push\":{\"changes\":[{\"new\":{\"name\":\"${env.BRANCH_NAME}\"}}]}}\'"
+                  sh returnStdout: true, script: "curl --request POST -k --url ${config.R10K_DEPLOY_URL}/payload --header \"Content-Type: application/json\" ${config.BASIC_AUTH_HEADER} --data \"{\"push\":{\"changes\":[{\"new\":{\"name\":\"${env.BRANCH_NAME}\"}}]}}\""
                   currentBuild.result = 'SUCCESS'
                 }
             }
