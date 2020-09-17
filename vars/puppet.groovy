@@ -18,6 +18,12 @@ def call(body) {
   } else {
     env.PUPPET_VERSION = config.PUPPET_VERSION
   }
+  if (!config.RUBY_VERSION){
+    error 'RUBY_VERSION is required'
+    
+  } else {
+    env.RUBY_VERSION = config.RUBY_VERSION
+  }
   if (!config.RUBY_GEMSET){
     error 'RUBY_GEMSET is required'
     
