@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [v2.1.0] - TBD
 
+### Fixed
+
+- Added back RUBY_VERSION support
+
+## [v2.0.1] - 7-12-2020
+
 ### Added
 
 - Full PDK support
